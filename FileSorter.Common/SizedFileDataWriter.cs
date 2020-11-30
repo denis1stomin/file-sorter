@@ -14,7 +14,10 @@ namespace FileSorter.Common
         {
             var str = item.ToString();
             var itemSize = this.Encoding.GetByteCount(str);
-            // TODO : may be crop the item size
+
+            // ignore next data
+            if (_currentSize > DesiredSize)
+                return;
 
             base.WriteItem(str);
             _currentSize += itemSize;
