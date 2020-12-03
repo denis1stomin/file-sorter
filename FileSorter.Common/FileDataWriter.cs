@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FileSorter.Common
 {
-    public class FileDataWriter : IDataWriter, IDisposable
+    public class FileDataWriter<T> : IDataWriter<T>, IDisposable
     {
         public Encoding Encoding { get; } = Encoding.UTF8;
 
@@ -14,16 +14,19 @@ namespace FileSorter.Common
                 throw new ArgumentException(nameof(path));
 
             var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+
+            // TODO : makes sense to provide int bufferSize to improve disk IO
+            //        but the best size depends on available RAM and disk info etc.
             _writer = new StreamWriter(stream, Encoding);
         }
 
-        public virtual void WriteItem(DataItem item)
+        public virtual void WriteItem(T item)
         {
             var str = item.ToString();
-            _writer.WriteLine(str);
+            this.WriteItem(str);
         }
 
-        public virtual void WriteItem(string item)
+        protected virtual void WriteItem(string item)
         {
             _writer.WriteLine(item);
         }

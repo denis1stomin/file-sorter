@@ -13,8 +13,12 @@ namespace FileGenerator
             var generator = new DataGenerator();
             var encoding = Encoding.UTF8;
 
-            using (var writer = new SizedFileDataWriter(outputPath, fileSize))
+            using (var writer = new SizedFileDataWriter<DataItem>(outputPath, fileSize))
             {
+                // TODO : Super simple way to improve the performance here is to 
+                //        run this loop inside a number of separate threads and just synchronize output writer.
+                //        Lines order is not important here, so no need in additional synchronizations.
+
                 while (!writer.EnoughData())
                 {
                     var item = generator.NewItem();

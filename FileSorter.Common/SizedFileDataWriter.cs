@@ -1,6 +1,6 @@
 namespace FileSorter.Common
 {
-    public class SizedFileDataWriter : FileDataWriter
+    public class SizedFileDataWriter<T> : FileDataWriter<T>
     {
         public long DesiredSize { get; }
         
@@ -10,7 +10,7 @@ namespace FileSorter.Common
             DesiredSize = desiredSize;
         }
 
-        public override void WriteItem(DataItem item)
+        public override void WriteItem(T item)
         {
             var str = item.ToString();
             var itemSize = this.Encoding.GetByteCount(str);

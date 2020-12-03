@@ -11,7 +11,9 @@ namespace FileGenerator
         {
             DataItem item = null;
 
-            // get each 40th from previously remembered
+            // TODO : make 30 and 40 - random values too.
+
+            // get each RNDth from previously remembered
             //   (1/40 % of repeats)
             if ((_itemIndex % 40 == 0) && _somePrevItems.Count > 0)
             {
@@ -55,7 +57,7 @@ namespace FileGenerator
         }
 
         private const string PossibleChars = " -ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        private const int MaxTextLength = 150;
+        private const int MaxTextLength = 30;
         private Random _rand = new Random();
         private List<DataItem> _somePrevItems = new List<DataItem>();
         private long _itemIndex = 0;

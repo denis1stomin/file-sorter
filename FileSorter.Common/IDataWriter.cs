@@ -1,7 +1,7 @@
 namespace FileSorter.Common
 {
-    public interface IDataWriter
+    public interface IDataWriter<T>
     {
-        void WriteItem(DataItem item);
+        void WriteItem(T item);
     }
 }
