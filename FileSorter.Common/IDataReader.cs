@@ -1,7 +1,9 @@
+using System;
+
 namespace FileSorter.Common
 {
-    public interface IDataReader //: IEnumerable<string>, IEnumerator<string>
+    public interface IDataReader<T> : IDisposable //: IEnumerable<string>, IEnumerator<string>
     {
-        DataItem NextItem();
+        T NextItem();
     }
 }

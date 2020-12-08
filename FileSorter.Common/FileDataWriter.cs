@@ -9,7 +9,7 @@ namespace FileSorter.Common
         public Encoding Encoding { get; } = Encoding.UTF8;
 
         public FileDataWriter(string path)
-            : this(CreateExclusiveWriteFile(path))
+            : this(Utils.CreateExclusiveWriteFile(path))
         {
         }
 
@@ -37,14 +37,6 @@ namespace FileSorter.Common
         public void Dispose()
         {
             _writer.Dispose();
-        }
-
-        private static FileStream CreateExclusiveWriteFile(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentException(nameof(path));
-            
-            return new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
         }
 
         private readonly StreamWriter _writer;

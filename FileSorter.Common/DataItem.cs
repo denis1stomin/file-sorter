@@ -2,7 +2,7 @@ using System;
 
 namespace FileSorter.Common
 {
-    public class DataItem : IComparable<DataItem>
+    public class DataItem
     {
         public long Number;
 
@@ -49,22 +49,6 @@ namespace FileSorter.Common
                 _serialized = $"{Number}. {Text}";
 
             return _serialized;
-        }
-
-        public int CompareTo(DataItem other)
-        {
-            if (other == null)
-                return 1;
-
-            var numCompare = this.Number.CompareTo(other.Number);
-            if (numCompare != 0)
-                return numCompare;
-
-            // TODO : use StringComparer to ignore some localization specifics.
-
-            var textCompare = this.Text.CompareTo(other.Text);
-
-            return textCompare;
         }
 
         private int _separatorIdx = -1;

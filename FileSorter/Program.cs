@@ -15,7 +15,8 @@ namespace FileSorter
 
             var cmdParam = parser.ParseArguments<CmdParam>(args);
 
-            var sorter = new FC.FileSorter();
+            var sorter = new FC.FileSorter("./unsorted_data.txt", "./output.txt");
+            sorter.Sort();
         }
     }
 }

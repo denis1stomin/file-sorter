@@ -18,8 +18,11 @@ namespace FileSorter.Common
             // TODO : use StringComparer to ignore some localization specifics.
 
             var textCompare = d1.Text.CompareTo(d2.Text);
+            if (textCompare != 0)
+                return textCompare;
 
-            return textCompare;
+            // This trick is used to avoid SortedSet structure limitation on elements duplication.
+            return -1;
         }
     }
 }
