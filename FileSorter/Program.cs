@@ -1,5 +1,6 @@
 ﻿using System;
 using CommandLine;
+using FC = FileSorter.Common;
 
 namespace FileSorter
 {
@@ -14,7 +15,7 @@ namespace FileSorter
 
             var cmdParam = parser.ParseArguments<CmdParam>(args);
 
-            
+            var sorter = new FC.FileSorter();
         }
     }
 }

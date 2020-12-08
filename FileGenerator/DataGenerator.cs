@@ -5,7 +5,7 @@ using FileSorter.Common;
 
 namespace FileGenerator
 {
-    class DataGenerator
+    public class DataGenerator
     {
         public DataItem NewItem()
         {

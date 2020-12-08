@@ -27,7 +27,7 @@ namespace FileSorter.UTests
             writer.Setup(x => x.WriteItem(It.IsAny<int>()))
                 .Callback<int>(i => savedList.Add(i));
 
-            var sorter = new StreamSorter<int>(writer.Object, maxCount);
+            var sorter = new StreamSorter<int>(writer.Object, null, maxCount);
 
             Assert.AreEqual(0, sorter.Count);
             Assert.AreEqual(maxCount, sorter.MaxCount);
@@ -55,7 +55,7 @@ namespace FileSorter.UTests
         {
             int maxCount = 10;
             var writer = new Mock<IDataWriter<int>>();
-            var sorter = new StreamSorter<int>(writer.Object, maxCount);
+            var sorter = new StreamSorter<int>(writer.Object, null, maxCount);
 
             Assert.AreEqual(0, sorter.Count);
             Assert.AreEqual(maxCount, sorter.MaxCount);

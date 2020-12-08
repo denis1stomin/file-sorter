@@ -9,11 +9,14 @@ namespace FileSorter.Common
         public Encoding Encoding { get; } = Encoding.UTF8;
 
         public FileDataWriter(string path)
+            : this(CreateExclusiveWriteFile(path))
         {
-            if (string.IsNullOrWhiteSpace(path))
-                throw new ArgumentException(nameof(path));
+        }
 
-            var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+        public FileDataWriter(FileStream stream)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
 
             // TODO : makes sense to provide int bufferSize to improve disk IO
             //        but the best size depends on available RAM and disk info etc.
@@ -34,6 +37,14 @@ namespace FileSorter.Common
         public void Dispose()
         {
             _writer.Dispose();
+        }
+
+        private static FileStream CreateExclusiveWriteFile(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException(nameof(path));
+            
+            return new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
         }
 
         private readonly StreamWriter _writer;

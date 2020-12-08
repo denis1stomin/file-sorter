@@ -15,6 +15,8 @@ namespace FileSorter.Common
             var str = item.ToString();
             var itemSize = this.Encoding.GetByteCount(str);
 
+            // TODO : hm looks like this place ignores Liskov substitution principle.
+
             // ignore next data
             if (_currentSize > DesiredSize)
                 return;
