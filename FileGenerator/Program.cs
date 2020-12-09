@@ -1,5 +1,7 @@
 ﻿using System;
-using System.Text;
+using System.IO;
+using System.Threading;
+using System.Collections.Generic;
 using FileSorter.Common;
 
 namespace FileGenerator
@@ -8,29 +10,71 @@ namespace FileGenerator
     {
         static void Main(string[] args)
         {
-            ParseArgs(args, out var outputPath, out var fileSize);
+            var startedAt = DateTime.UtcNow;
+
+            ParseArgs(args, out var outputPath, out var fileSize, out var threadsNum);
 
             using (var writer = new SizedFileDataWriter<DataItem>(outputPath, fileSize))
             {
-                // TODO : Super simple way to improve the performance here is to 
-                //        run this loop inside a number of separate threads and just synchronize output writer.
-                //        Lines order is not important here, so no need in additional synchronizations.
-
-                // new ThreadStart(writer)
+                if (threadsNum > 1)
                 {
+                    Console.WriteLine($"{threadsNum} threads mode.");
+
+                    var threads = new List<Thread>(threadsNum);
+                    for (int i = 0; i < threadsNum; ++i)
+                    {
+                        var threadStart = new ParameterizedThreadStart(GeneratorThreadFunc);
+                        var thread = new Thread(threadStart);
+
+                        thread.Start(writer);
+                        threads.Add(thread);
+                    }
+                    
+                    foreach (var thread in threads)
+                        thread.Join();
+                }
+                else
+                {
+                    Console.WriteLine($"Single thread mode.");
+
                     var generator = new DataGenerator();
                     while (!writer.EnoughData())
                     {
                         var item = generator.NewItem();
-
-                        //lock (writer)
                         writer.WriteItem(item);
                     }
                 }
             }
+
+            var spentTime = DateTime.UtcNow.Subtract(startedAt);
+
+            var fileInfo = new FileInfo(outputPath);
+            Console.WriteLine($"Generated {fileInfo.Length} bytes at '{outputPath}'.{Environment.NewLine}Spent '{spentTime}'.");
         }
 
-        static void ParseArgs(string[] args, out string outputPath, out long fileSize)
+        static void GeneratorThreadFunc(object writerInput)
+        {
+            var writer = writerInput as SizedFileDataWriter<DataItem>;
+            if (writer == null)
+            {
+                Console.WriteLine("'writer' object is not of a type 'SizedFileDataWriter<DataItem>'.");
+                Environment.Exit(1);
+            }
+
+            var generator = new DataGenerator();
+            while (!writer.EnoughData())
+            {
+                var item = generator.NewItem();
+
+                lock (writer)
+                {
+                    if (!writer.EnoughData())
+                        writer.WriteItem(item);
+                }
+            }
+        }
+
+        static void ParseArgs(string[] args, out string outputPath, out long fileSize, out int threadsNum)
         {
             if (args.Length < 2)
                 throw new ArgumentException("Not enough input parameters. Should be FileGenerator <sizeBytes> <outputPath>.");
@@ -39,6 +83,13 @@ namespace FileGenerator
                 throw new ArgumentException("File size should be a valid long integer.");
             
             outputPath = args[1];
+
+            threadsNum = Environment.ProcessorCount / 2;
+            if (args.Length > 2)
+            {
+                if (!int.TryParse(args[2], out threadsNum))
+                    throw new ArgumentException("File size should be a valid integer.");
+            }
         }
     }
 }

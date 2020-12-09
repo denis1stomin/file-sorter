@@ -38,28 +38,28 @@ namespace FileGenerator
 
         private string RandomString(int size)
         {
-            var stringChars = new char[size];
-            for (int i = 0; i < stringChars.Length; i++)
-                stringChars[i] = PossibleChars[_rand.Next(PossibleChars.Length)];
+            var maxIdx = PossibleChars.Length;
 
-            return new String(stringChars);
+            for (int i = 0; i < size; i++)
+                _stringChars[i] = PossibleChars[_rand.Next(maxIdx)];
+
+            return new String(_stringChars, 0, size);
         }
 
         private long RandomLong()
         {
-            var buf = new byte[6];
-            _rand.NextBytes(buf);
-
-            Array.Resize(ref buf, 8);
-            var longRand = BitConverter.ToInt64(buf, 0);
+            _rand.NextBytes(_longBytes);
+            var longRand = BitConverter.ToInt64(_longBytes);
 
             return longRand;
         }
 
         private const string PossibleChars = " -ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        private const int MaxTextLength = 30;
+        private const int MaxTextLength = 50;
         private Random _rand = new Random();
         private List<DataItem> _somePrevItems = new List<DataItem>();
         private long _itemIndex = 0;
+        private byte[] _longBytes = new byte[8];
+        private char[] _stringChars = new char[MaxTextLength];
     }
 }
