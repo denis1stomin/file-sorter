@@ -16,7 +16,11 @@ namespace FileGenerator
 
             if (textualGen)
             {
-                GenerateWithoutConversions(outputPath, fileSize);
+                Console.WriteLine($"Single thread mode without conversions.");
+
+                var generator = new TextualDataGenerator();
+                generator.Generate(outputPath, fileSize);
+
                 return;
             }
 
@@ -102,12 +106,6 @@ namespace FileGenerator
                 else
                     textualGen = "textual".Equals(args[2]);
             }
-        }
-
-        static void GenerateWithoutConversions(string filePath, long size)
-        {
-            var generator = new TextualDataGenerator();
-            generator.Generate(filePath, size);
         }
     }
 }

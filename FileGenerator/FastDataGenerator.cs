@@ -34,12 +34,11 @@ namespace FileGenerator
                 return bytesWrittenAfter - bytesWrittenBefore;
             }
 
-        public void Generate(string filePath, long size)
+        public void Generate(string filePath, long maxFileSize)
         {
             string numArr = "0123456789";
             string textArr = " -ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-            const long maxFileSize = 1024 * 1024 * 1024;    // 1 GB
             const int bufferSize = 1024 * 1024 * 100;
             const int maxNumberLength = 15;                 // long integer
             const int maxTextLength = 50;
