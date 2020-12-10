@@ -22,7 +22,9 @@ namespace FileSorter
 
         static void MainInner(CmdParam param)
         {
-            var sorter = new FC.FileSorter(param.Source, param.Destination);
+            var sorter = new FC.FileSorter(
+                param.Source, param.Destination, param.TempFolder, param.PartitionMaxSize);
+                
             sorter.Sort();
         }
 
