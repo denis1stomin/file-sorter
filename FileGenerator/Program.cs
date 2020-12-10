@@ -12,7 +12,13 @@ namespace FileGenerator
         {
             var startedAt = DateTime.UtcNow;
 
-            ParseArgs(args, out var outputPath, out var fileSize, out var threadsNum);
+            ParseArgs(args, out var outputPath, out var fileSize, out var threadsNum, out var textualGen);
+
+            if (textualGen)
+            {
+                GenerateWithoutConversions(outputPath, fileSize);
+                return;
+            }
 
             using (var writer = new SizedFileDataWriter<DataItem>(outputPath, fileSize))
             {
@@ -74,7 +80,7 @@ namespace FileGenerator
             }
         }
 
-        static void ParseArgs(string[] args, out string outputPath, out long fileSize, out int threadsNum)
+        static void ParseArgs(string[] args, out string outputPath, out long fileSize, out int threadsNum, out bool textualGen)
         {
             if (args.Length < 2)
                 throw new ArgumentException("Not enough input parameters. Should be FileGenerator <sizeBytes> <outputPath>.");
@@ -82,14 +88,26 @@ namespace FileGenerator
             if (!long.TryParse(args[0], out fileSize))
                 throw new ArgumentException("File size should be a valid long integer.");
             
+            textualGen = false;
             outputPath = args[1];
 
             threadsNum = Environment.ProcessorCount / 2;
             if (args.Length > 2)
             {
-                if (!int.TryParse(args[2], out threadsNum))
-                    throw new ArgumentException("File size should be a valid integer.");
+                if (int.TryParse(args[2], out threadsNum))
+                {
+                    if (args.Length > 3)
+                        textualGen = "textual".Equals(args[3]);
+                }
+                else
+                    textualGen = "textual".Equals(args[2]);
             }
+        }
+
+        static void GenerateWithoutConversions(string filePath, long size)
+        {
+            var generator = new TextualDataGenerator();
+            generator.Generate(filePath, size);
         }
     }
 }

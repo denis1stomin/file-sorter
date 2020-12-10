@@ -20,5 +20,13 @@ namespace FileSorter.Common
             
             return new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
         }
+
+        public static FileStream CreateExclusiveWriteFile(string path, int bufferSize)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException(nameof(path));
+            
+            return new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize);
+        }
     }
 }
