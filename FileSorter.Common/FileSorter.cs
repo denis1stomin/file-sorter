@@ -28,14 +28,23 @@ namespace FileSorter.Common
         public void Sort()
         {
             EnsureTempFolderIsCreated();
+
+            var p1 = DateTime.UtcNow;
             PartitionInputData();
+            var p2 = DateTime.UtcNow;
             MergeSortedPartitions();
+            var p3 = DateTime.UtcNow;
+
+            Console.WriteLine($"Partitioning step took '{p2.Subtract(p1)}'");
+            Console.WriteLine($"Merging step took '{p3.Subtract(p2)}'");
         }
 
         private void EnsureTempFolderIsCreated()
         {
-            if (!Directory.Exists(TempFolder))
-                Directory.CreateDirectory(TempFolder);
+            if (Directory.Exists(TempFolder))
+                Directory.Delete(TempFolder);
+            
+            Directory.CreateDirectory(TempFolder);
         }
 
         private void PartitionInputData()

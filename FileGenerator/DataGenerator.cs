@@ -7,15 +7,22 @@ namespace FileGenerator
 {
     public class DataGenerator
     {
+        public const int RepeatPercentage = 20;
+
+        public DataGenerator()
+        {
+            if (RepeatPercentage < 1 || RepeatPercentage > 49)
+                throw new ArgumentException($"{nameof(RepeatPercentage)} cannot be lower than 1 and greater than 49.");
+        }
+
         public DataItem NewItem()
         {
+            _itemIndex ++;
+
             DataItem item = null;
 
-            // TODO : make 30 and 40 - random values too.
-
             // get each RNDth from previously remembered
-            //   (1/40 % of repeats)
-            if ((_itemIndex % 40 == 0) && _somePrevItems.Count > 0)
+            if ((_itemIndex % _fromMemoryIdx == 0) && _somePrevItems.Count > 0)
             {
                 item = _somePrevItems[_rand.Next(_somePrevItems.Count)];
             }
@@ -27,12 +34,10 @@ namespace FileGenerator
                 );
             }
 
-            // remember each 30th item
-            if (_itemIndex % 30 == 0)
+            // remember each previous before repeat
+            if (_itemIndex % (_fromMemoryIdx - 1) == 0)
                 _somePrevItems.Add(item);
             
-            _itemIndex ++;
-
             return item;
         }
 
@@ -54,12 +59,14 @@ namespace FileGenerator
             return longRand;
         }
 
-        private const string PossibleChars = " -ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        private char[] PossibleChars = " -ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзиклмнопрстуфхцчшщъыьэюя".ToCharArray();
         private const int MaxTextLength = 50;
         private Random _rand = new Random();
         private List<DataItem> _somePrevItems = new List<DataItem>();
         private long _itemIndex = 0;
         private byte[] _longBytes = new byte[8];
         private char[] _stringChars = new char[MaxTextLength];
+
+        private const int _fromMemoryIdx = 100 / RepeatPercentage;  // brutal presicion)
     }
 }

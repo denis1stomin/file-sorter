@@ -37,6 +37,7 @@ namespace FileSorter.Common
             {
                 _data.Add(next);
 
+                // TODO : currently _data.Count is not bytes!!!
                 if (_data.Count >= PartitionMaxSize)
                     SavePartition();
                 

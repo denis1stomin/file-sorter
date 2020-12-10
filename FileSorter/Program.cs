@@ -9,6 +9,8 @@ namespace FileSorter
     {
         static void Main(string[] args)
         {
+            var p1 = DateTime.UtcNow;
+
             var parser = new Parser(x => {
                 x.CaseSensitive = false;
                 x.IgnoreUnknownArguments = true;
@@ -18,13 +20,17 @@ namespace FileSorter
             parser.ParseArguments<CmdParam>(args)
                 .WithParsed<CmdParam>(MainInner)
                 .WithNotParsed(NotParsed);
+            
+            var p2 = DateTime.UtcNow;
+
+            Console.WriteLine($"Overall spent '{p2.Subtract(p1)}'");
         }
 
         static void MainInner(CmdParam param)
         {
             var sorter = new FC.FileSorter(
                 param.Source, param.Destination, param.TempFolder, param.PartitionMaxSize);
-                
+
             sorter.Sort();
         }
 

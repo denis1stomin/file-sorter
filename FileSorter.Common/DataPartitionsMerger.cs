@@ -33,11 +33,14 @@ namespace FileSorter.Common
             var initialPartitions = PartitionFolder.EnumerateFiles("*.part").ToList();
             initialPartitions.Sort(new PartitionsComparer());
 
-            // TODO : should be DestinationPath
             var resultFile = MergePartitions(initialPartitions.Select(f => f.FullName).ToList());
-            //Console.WriteLine($"Result file is '{resultFile}'");
+
+            var p1 = DateTime.UtcNow;
             File.Delete(DestinationPath);
             File.Move(resultFile, DestinationPath);
+            var p2 = DateTime.UtcNow;
+
+            Console.WriteLine($"Just moving to destination took '{p2.Subtract(p1)}'");
         }
 
         private string MergePartitions(IEnumerable<string> partitions)
@@ -87,9 +90,6 @@ namespace FileSorter.Common
         {
             public int Compare(FileInfo p1, FileInfo p2)
             {
-                // TODO : to avoid this parsing we can get this data right from the first step - PartitionerSorter work.
-                Console.WriteLine($"=======> {p1.Name.Split('_').First()}");
-
                 var linesCnt1 = int.Parse(p1.Name.Split('_').First());
                 var linesCnt2 = int.Parse(p2.Name.Split('_').First());
 
