@@ -64,7 +64,7 @@ namespace FileSorter.Common
             merger.StartWork();
         }
 
-        private readonly DataItemComparer Comparer = new DataItemComparer();
+        private readonly DataItemTrickyComparer Comparer = new DataItemTrickyComparer();
         private readonly Func<string, DataItem> Parser = x => new DataItem(x);
     }
 }

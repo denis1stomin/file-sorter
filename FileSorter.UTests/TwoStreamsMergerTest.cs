@@ -22,7 +22,7 @@ namespace FileSorter.UTests
             var sourcePath2 = $"{root}input_{length2}.txt";
             var outputPath = $"{root}output_{length1}_{length2}.txt";
 
-            var comparer = new DataItemComparer();
+            var comparer = new DataItemTrickyComparer();
 
             var data1 = CreateTestData(length1, maxNumber);
             data1.Sort(comparer);
@@ -37,7 +37,7 @@ namespace FileSorter.UTests
             var destFile = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
             using(var merger = new TwoStreamsMerger<DataItem>(
-                        sourceFile, sourceFile2, destFile, new DataItemComparer(), s => new DataItem(s)))
+                        sourceFile, sourceFile2, destFile, new DataItemTrickyComparer(), s => new DataItem(s)))
             {
                 merger.Merge();
             }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace FileSorter.Common
 {
-    public class DataItemComparer : IComparer<DataItem>
+    public class DataItemTrickyComparer : IComparer<DataItem>
     {
         public int Compare(DataItem d1, DataItem d2)
         {
@@ -21,7 +21,8 @@ namespace FileSorter.Common
             if (textCompare != 0)
                 return textCompare;
 
-            return 0;
+            // This trick is used to avoid SortedSet structure limitation on elements duplication.
+            return -1;
         }
     }
 }
