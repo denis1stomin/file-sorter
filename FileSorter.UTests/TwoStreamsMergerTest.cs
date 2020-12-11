@@ -15,14 +15,13 @@ namespace FileSorter.UTests
         [DataRow(0, 100, 150)]
         [DataRow(200, 100, 150)]
         [DataRow(4321, 5678, 150)]
-        public void Test1(int length1, int length2, long maxNumber)
+        public void JustSort(int length1, int length2, long maxNumber)
         {
-            var root = "/home/des/src/own/test-tasks/file-sorter/FileSorter.UTests/";
-            var sourcePath1 = $"{root}input_{length1}.txt";
-            var sourcePath2 = $"{root}input_{length2}.txt";
-            var outputPath = $"{root}output_{length1}_{length2}.txt";
+            var sourcePath1 = $"input_{length1}.txt";
+            var sourcePath2 = $"input_{length2}.txt";
+            var outputPath = $"output_{length1}_{length2}.txt";
 
-            var comparer = new DataItemTrickyComparer();
+            var comparer = new DataItemComparer();
 
             var data1 = CreateTestData(length1, maxNumber);
             data1.Sort(comparer);
@@ -37,7 +36,7 @@ namespace FileSorter.UTests
             var destFile = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
             using(var merger = new TwoStreamsMerger<DataItem>(
-                        sourceFile, sourceFile2, destFile, new DataItemTrickyComparer(), s => new DataItem(s)))
+                        sourceFile, sourceFile2, destFile, comparer, s => new DataItem(s)))
             {
                 merger.Merge();
             }
