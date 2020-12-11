@@ -42,7 +42,7 @@ namespace FileSorter.Common
         private void EnsureTempFolderIsCreated()
         {
             if (Directory.Exists(TempFolder))
-                Directory.Delete(TempFolder);
+                Directory.Delete(TempFolder, true);
             
             Directory.CreateDirectory(TempFolder);
         }
@@ -52,7 +52,7 @@ namespace FileSorter.Common
             using (var sourceReader = new FileDataReader<DataItem>(SourcePath, Parser))
             {
                 var partitioner = new DataPartitionerSorter<DataItem>(
-                    sourceReader, TempFolder, TempFileMaxSize, Comparer);
+                    sourceReader, TempFolder, TempFileMaxSize, new DataItemTrickyComparer());
 
                 partitioner.StartWork();
             }
@@ -60,11 +60,10 @@ namespace FileSorter.Common
 
         private void MergeSortedPartitions()
         {
-            var merger = new DataPartitionsMerger<DataItem>(TempFolder, DestPath, 1, Comparer, Parser);
+            var merger = new DataPartitionsMerger<DataItem>(TempFolder, DestPath, 1, new DataItemComparer(), Parser);
             merger.StartWork();
         }
 
-        private readonly DataItemTrickyComparer Comparer = new DataItemTrickyComparer();
         private readonly Func<string, DataItem> Parser = x => new DataItem(x);
     }
 }
