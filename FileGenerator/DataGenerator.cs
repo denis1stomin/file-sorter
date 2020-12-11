@@ -8,6 +8,7 @@ namespace FileGenerator
     public class DataGenerator
     {
         public const int RepeatPercentage = 20;
+        public const int MaxMemorySize = 10000;
 
         public DataGenerator()
         {
@@ -35,7 +36,7 @@ namespace FileGenerator
             }
 
             // remember each previous before repeat
-            if (_itemIndex % (_fromMemoryIdx - 1) == 0)
+            if ((_somePrevItems.Count < MaxMemorySize) && (_itemIndex % (_fromMemoryIdx - 1) == 0))
                 _somePrevItems.Add(item);
             
             return item;

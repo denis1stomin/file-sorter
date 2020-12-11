@@ -51,8 +51,8 @@ namespace FileSorter.Common
         {
             using (var sourceReader = new FileDataReader<DataItem>(SourcePath, Parser))
             {
-                var partitioner = new DataPartitionerSorter<DataItem>(
-                    sourceReader, TempFolder, TempFileMaxSize, new DataItemTrickyComparer());
+                var partitioner = new MtDataPartitionerSorter<DataItem>(
+                    sourceReader, TempFolder, TempFileMaxSize, new DataItemTrickyComparer(), Environment.ProcessorCount);
 
                 partitioner.StartWork();
             }
@@ -60,7 +60,8 @@ namespace FileSorter.Common
 
         private void MergeSortedPartitions()
         {
-            var merger = new DataPartitionsMerger<DataItem>(TempFolder, DestPath, 1, new DataItemComparer(), Parser);
+            var merger = new DataPartitionsMerger<DataItem>(
+                TempFolder, DestPath, 1, new DataItemComparer(), Parser);
             merger.StartWork();
         }
 

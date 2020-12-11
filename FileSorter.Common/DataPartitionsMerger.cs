@@ -14,6 +14,8 @@ namespace FileSorter.Common
 
         public Encoding Encoding { get; } = Encoding.UTF8;
 
+        public int ThreadsNum { get; } = Environment.ProcessorCount;
+
         public DataPartitionsMerger(
             string partitionFolder, string destPath, int threadsNum, IComparer<T> dataComparer, Func<string, T> parser)
         {
@@ -22,6 +24,8 @@ namespace FileSorter.Common
 
             DestinationPath = !string.IsNullOrWhiteSpace(destPath) ? destPath
                 : throw new ArgumentException(nameof(destPath));
+
+            ThreadsNum = (threadsNum > 0) ? threadsNum : throw new ArgumentException(nameof(threadsNum));
             
             _dataComparer = dataComparer ?? throw new ArgumentNullException(nameof(dataComparer));
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Collections.Generic;
+using System.Diagnostics;
 using FileSorter.Common;
 
 namespace FileGenerator
@@ -14,6 +15,9 @@ namespace FileGenerator
 
             ParseArgs(args, out var outputPath, out var fileSize, out var threadsNum, out var textualGen);
 
+            // Just empirical coef to drop additional bytes of UTF-8 encoding.
+            fileSize = (long)(fileSize * 0.983085069);
+
             if (textualGen)
             {
                 Console.WriteLine($"Single thread mode without conversions.");
@@ -24,7 +28,9 @@ namespace FileGenerator
                 return;
             }
 
-            using (var writer = new SizedFileDataWriter<DataItem>(outputPath, fileSize))
+            int fileBufferSize = 1024 * 1024 * 100;
+
+            using (var writer = new SizedFileDataWriter<DataItem>(outputPath, fileSize, fileBufferSize))
             {
                 if (threadsNum > 1)
                 {

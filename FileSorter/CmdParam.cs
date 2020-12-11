@@ -13,7 +13,7 @@ namespace FileSorter
         [Option('t', "temp", Default = "./.srt_tmp", Required = false, HelpText = "The path to a temp working folder.")]
         public string TempFolder { get; set; }
 
-        [Option('p', "partition-size", Default = 1024 * 1024 * 50, Required = false, HelpText = "Maximum temporary file size in bytes.")]
+        [Option('p', "partition-size", Default = 1024 * 1024 * 30, Required = false, HelpText = "Maximum temporary file size in bytes.")]
         public long PartitionMaxSize { get; set; }
     }
 }

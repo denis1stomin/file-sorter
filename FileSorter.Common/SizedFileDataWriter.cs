@@ -4,8 +4,8 @@ namespace FileSorter.Common
     {
         public long DesiredSize { get; }
         
-        public SizedFileDataWriter(string path, long desiredSize)
-            : base(path)
+        public SizedFileDataWriter(string path, long desiredSize, int bufSize)
+            : base(path, bufSize)
         {
             DesiredSize = desiredSize;
         }

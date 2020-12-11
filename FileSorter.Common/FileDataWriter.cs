@@ -8,8 +8,8 @@ namespace FileSorter.Common
     {
         public Encoding Encoding { get; } = Encoding.UTF8;
 
-        public FileDataWriter(string path)
-            : this(Utils.CreateExclusiveWriteFile(path))
+        public FileDataWriter(string path, int bufSize)
+            : this(Utils.CreateExclusiveWriteFile(path, bufSize))
         {
         }
 

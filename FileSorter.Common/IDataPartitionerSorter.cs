@@ -10,10 +10,7 @@ namespace FileSorter.Common
         /// A maximum size of sorted partition.
         long PartitionMaxSize { get; }
 
-        /// Used text encoding.
-        Encoding Encoding { get; }
-
         /// Starts partitioning work.
-        void StartWork();
+        void StartWork(bool wait = true);
     }
 }

@@ -11,7 +11,7 @@ namespace FileSorter.Common
 
         public long PartitionMaxSize { get; }
 
-        public Encoding Encoding { get; } = Encoding.UTF8;
+        public static Encoding Encoding { get; } = Encoding.UTF8;
 
         public DataPartitionerSorter(
             IDataReader<T> dataReader, string partitionFolder, long partitionMaxSize, IComparer<T> dataComparer)
@@ -23,52 +23,49 @@ namespace FileSorter.Common
             
             PartitionMaxSize = (partitionMaxSize > 0) ? partitionMaxSize
                 : throw new ArgumentException(nameof(partitionMaxSize));
-
-            _data = (dataComparer != null) ? new SortedSet<T>(dataComparer)
-                : throw new ArgumentNullException(nameof(dataComparer));
+            
+            _dataComparer = dataComparer ?? throw new ArgumentNullException(nameof(dataComparer));
         }
 
-        public void StartWork()
+        public virtual void StartWork(bool wait = true)
         {
-            // TODO : if disk IO is good it makes sense to parallel the loop below.
+            // Looks like a binary tree
+            // https://github.com/microsoft/referencesource/blob/master/System/compmod/system/collections/generic/sortedset.cs
+            var data = new SortedSet<T>(_dataComparer);
 
             var next = _dataReader.NextItem();
             while (next != null)
             {
-                _data.Add(next);
+                data.Add(next);
 
                 // TODO : currently _data.Count is not bytes!!!
-                if (_data.Count >= PartitionMaxSize)
-                    SavePartition();
+                if (data.Count >= PartitionMaxSize)
+                    SavePartition(data, PartitionFolder);
                 
                 next = _dataReader.NextItem();
             }
 
-            if (_data.Count > 0)
-                SavePartition();
+            if (data.Count > 0)
+                SavePartition(data, PartitionFolder);
         }
 
-        private void SavePartition()
+        protected static void SavePartition(SortedSet<T> data, string saveFolder)
         {
-            var partitionPath = $"{PartitionFolder}/{_data.Count}_{_fileUniqueSuffix ++}.part";
+            var partitionPath = $"{saveFolder}/{data.Count}_{Guid.NewGuid()}.part";
             var stream = Utils.CreateExclusiveWriteFile(partitionPath);
 
             using (var writer = new StreamWriter(stream, Encoding))
             {
-                foreach (var el in _data)
+                foreach (var el in data)
                     writer.WriteLine(el);
 
                 writer.Close();
             }
 
-            _data.Clear();
+            data.Clear();
         }
 
-        private int _fileUniqueSuffix = 1;
-        private readonly IDataReader<T> _dataReader;
-
-        // Looks like a binary tree
-        // https://github.com/microsoft/referencesource/blob/master/System/compmod/system/collections/generic/sortedset.cs
-        private readonly SortedSet<T> _data;
+        protected readonly IDataReader<T> _dataReader;
+        protected readonly IComparer<T> _dataComparer;
     }
 }
