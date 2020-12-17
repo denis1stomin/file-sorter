@@ -11,6 +11,10 @@ namespace FileSorter.Common
 
         public long PartitionMaxSize { get; }
 
+        // Just empirical coef for current type of data.
+        // definitely should be changed by proper partition bytes calculating in the future.
+        public int EmpiricalAverageItemSize { get; } = 59;
+
         public static Encoding Encoding { get; } = Encoding.UTF8;
 
         public DataPartitionerSorter(
@@ -21,7 +25,7 @@ namespace FileSorter.Common
             PartitionFolder = !string.IsNullOrWhiteSpace(partitionFolder) ? partitionFolder
                 : throw new ArgumentException(nameof(partitionFolder));
             
-            PartitionMaxSize = (partitionMaxSize > 0) ? partitionMaxSize
+            PartitionMaxSize = (partitionMaxSize > 0) ? partitionMaxSize / EmpiricalAverageItemSize
                 : throw new ArgumentException(nameof(partitionMaxSize));
             
             _dataComparer = dataComparer ?? throw new ArgumentNullException(nameof(dataComparer));
@@ -49,7 +53,12 @@ namespace FileSorter.Common
                 SavePartition(data, PartitionFolder);
         }
 
-        protected static void SavePartition(SortedSet<T> data, string saveFolder)
+        public virtual void WaitWorkFinished()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected static FileInfo SavePartition(ICollection<T> data, string saveFolder)
         {
             var partitionPath = $"{saveFolder}/{data.Count}_{Guid.NewGuid()}.part";
             var stream = Utils.CreateExclusiveWriteFile(partitionPath);
@@ -63,6 +72,9 @@ namespace FileSorter.Common
             }
 
             data.Clear();
+            //GC.Collect();
+
+            return new FileInfo(partitionPath);
         }
 
         protected readonly IDataReader<T> _dataReader;

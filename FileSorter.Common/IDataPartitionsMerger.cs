@@ -15,6 +15,12 @@ namespace FileSorter.Common
         Encoding Encoding { get; }
 
         /// Starts merging work.
-        void StartWork(/* TODO ManualResetEvent noMorePartitionsEvent */);
+        void StartWork();
+
+        /// Blocks current thread till whole work is finished.
+        void WaitWorkFinished();
+
+        /// Signals to internal workers that there will no be more partitions to handle.
+        void SignalNoMoreNewPartitions();
     }
 }

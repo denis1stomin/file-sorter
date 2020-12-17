@@ -6,58 +6,102 @@ namespace FileSorter.Common
 {
     public class MtDataPartitionerSorter<T> : DataPartitionerSorter<T> where T : class
     {
-        public int ThreadsNum { get; } = Environment.ProcessorCount;
+        public int ThreadsMax { get; } = Environment.ProcessorCount;
 
         public MtDataPartitionerSorter(
-            IDataReader<T> dataReader, string partitionFolder, long partitionMaxSize, IComparer<T> dataComparer, int threadsNum)
+            IDataReader<T> dataReader, string partitionFolder, long partitionMaxSize,
+            IComparer<T> dataComparer, int threadsMax, PartitionMap partitionMap)
+
             : base(dataReader, partitionFolder, partitionMaxSize, dataComparer)
         {
-            ThreadsNum = (threadsNum > 0) ? threadsNum : throw new ArgumentException(nameof(threadsNum));
+            ThreadsMax = (threadsMax > 0) ? threadsMax : throw new ArgumentException(nameof(threadsMax));
+            _partitionMap = partitionMap ?? throw new ArgumentNullException(nameof(partitionMap));
         }
 
         public override void StartWork(bool wait = true)
         {
-            var threads = new List<Thread>(ThreadsNum);
-            for (int i = 0; i< ThreadsNum; ++i)
-            {
-                var thread = new Thread(ThreadFunc);
-                thread.Start();
-
-                threads.Add(thread);
-            }
+            _readerThread = new Thread(new ThreadStart(ReaderThreadFunc));
+            _readerThread.Start();
 
             if (wait)
-            {
-                foreach (var thread in threads)
-                    thread.Join();
-            }
+                WaitWorkFinished();
         }
 
-        private void ThreadFunc()
+        public override void WaitWorkFinished()
         {
-            // Looks like a binary tree
-            // https://github.com/microsoft/referencesource/blob/master/System/compmod/system/collections/generic/sortedset.cs
-            var data = new SortedSet<T>(_dataComparer);
+            _readerThread.Join();
+            
+            while (_workerThreads.Count > 0)
+                Thread.Sleep(50);
+        }
 
-            T next = null;
-            do
+        private void ReaderThreadFunc()
+        {
+            try
             {
-                lock (_dataReader)
-                    next = _dataReader.NextItem();
-                
-                if (next != null)
-                {
-                    data.Add(next);
+                var partition = new List<T>((int)PartitionMaxSize);
 
-                    // TODO : currently _data.Count is not bytes!!!
-                    if (data.Count >= PartitionMaxSize)
-                        SavePartition(data, PartitionFolder);
+                var next = _dataReader.NextItem();
+                while (next != null)
+                {
+                    while (_workerThreads.Count >= ThreadsMax)
+                        Thread.Sleep(50);
+
+                    partition.Add(next);
+
+                    if (partition.Count == PartitionMaxSize)
+                    {
+                        var t = new Thread(new ParameterizedThreadStart(WorkerThreadFunc));
+
+                        lock (_workerThreads)
+                            _workerThreads.Add(t);
+
+                        t.Start(partition);
+                        
+                        partition = new List<T>((int)PartitionMaxSize);
+                    }
+
+                    next = _dataReader.NextItem();
                 }
             }
-            while (next != null);
-
-            if (data.Count > 0)
-                SavePartition(data, PartitionFolder);
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Got an error {ex}, {ex.Message}");
+                throw;
+            }
         }
+
+        private void WorkerThreadFunc(object partition)
+        {
+            WorkerThreadFunc(
+                partition as List<T> ?? throw new ArgumentException(nameof(partition))
+            );
+        }
+
+        private void WorkerThreadFunc(List<T> partition)
+        {
+            try
+            {
+                partition.Sort(_dataComparer);
+                var linesCount = partition.Count;
+
+                var fileInfo = SavePartition(partition, PartitionFolder);
+                
+                _partitionMap.AddNewPartition(
+                    new PartitionInfo(fileInfo, linesCount));
+
+                lock (_workerThreads)
+                    _workerThreads.Remove(Thread.CurrentThread);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Got an error {ex}, {ex.Message}");
+                throw;
+            }
+        }
+
+        private Thread _readerThread;
+        private readonly List<Thread> _workerThreads = new List<Thread>();
+        private readonly PartitionMap _partitionMap = new PartitionMap();
     }
 }

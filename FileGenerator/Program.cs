@@ -13,7 +13,7 @@ namespace FileGenerator
         {
             var startedAt = DateTime.UtcNow;
 
-            ParseArgs(args, out var outputPath, out var fileSize, out var threadsNum, out var textualGen);
+            ParseArgs(args, out var outputPath, out var fileSize, out var threadsNum, out var textualGen, out var fileBufferSize);
 
             // Just empirical coef to drop additional bytes of UTF-8 encoding.
             fileSize = (long)(fileSize * 0.983085069);
@@ -28,8 +28,6 @@ namespace FileGenerator
                 return;
             }
 
-            int fileBufferSize = 1024 * 1024 * 100;
-
             using (var writer = new SizedFileDataWriter<DataItem>(outputPath, fileSize, fileBufferSize))
             {
                 if (threadsNum > 1)
@@ -42,8 +40,8 @@ namespace FileGenerator
                         var threadStart = new ParameterizedThreadStart(GeneratorThreadFunc);
                         var thread = new Thread(threadStart);
 
-                        thread.Start(writer);
                         threads.Add(thread);
+                        thread.Start(writer);
                     }
                     
                     foreach (var thread in threads)
@@ -90,7 +88,8 @@ namespace FileGenerator
             }
         }
 
-        static void ParseArgs(string[] args, out string outputPath, out long fileSize, out int threadsNum, out bool textualGen)
+        static void ParseArgs(
+            string[] args, out string outputPath, out long fileSize, out int threadsNum, out bool textualGen, out int fileBufferSize)
         {
             if (args.Length < 2)
                 throw new ArgumentException("Not enough input parameters. Should be FileGenerator <sizeBytes> <outputPath>.");
@@ -112,6 +111,9 @@ namespace FileGenerator
                 else
                     textualGen = "textual".Equals(args[2]);
             }
+
+            // TODO : arg
+            fileBufferSize = 1024 * 1024 * 100;
         }
     }
 }

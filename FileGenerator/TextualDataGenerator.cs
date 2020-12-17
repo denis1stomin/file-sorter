@@ -37,7 +37,7 @@ namespace FileGenerator
         public void Generate(string filePath, long maxFileSize)
         {
             string numArr = "0123456789";
-            string textArr = " -ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            string textArr = " -ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзиклмнопрстуфхцчшщъыьэюя";
 
             const int bufferSize = 1024 * 1024 * 100;
             const int maxNumberLength = 15;                 // long integer

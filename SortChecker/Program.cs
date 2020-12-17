@@ -24,6 +24,7 @@ namespace SortChecker
                 long maxSeqRepeatCnt = 0;
                 long sortFaults = 0;
 
+                // suppose it is always > 2 items
                 var prev = reader.NextItem();
                 var cur = reader.NextItem();
                 while (cur != null)
