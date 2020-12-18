@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
 
@@ -41,7 +40,12 @@ namespace FileSorter.Common
             Console.WriteLine($"Adding new partition '{partition.Partition.Name}/{partition.LinesCount}'");
 
             lock (_locker)
+            {
+                if (lastWasTaken)
+                    throw new Exception("Something wrong here!");
+
                 _partitions.Add(partition);
+            }
 
             _newPartitionEvent.Set();
         }
@@ -53,6 +57,8 @@ namespace FileSorter.Common
                 var last = PopMinUnsafe();
                 if (_partitions.Count > 0)
                     throw new Exception("Something wrong here!");
+                
+                lastWasTaken = true;
                 
                 return last;
             }
@@ -68,10 +74,7 @@ namespace FileSorter.Common
             var min = _partitions.Min;
             if (min != null)
             {
-                _partitionsComparer.TrickyMode = false;
                 bool done = _partitions.Remove(min);
-                _partitionsComparer.TrickyMode = true;
-
                 if (!done)
                     throw new Exception("Something wrong here!");
             }
@@ -83,21 +86,20 @@ namespace FileSorter.Common
         private readonly SortedSet<PartitionInfo> _partitions;
         private readonly AutoResetEvent _newPartitionEvent = new AutoResetEvent(false);
         private readonly object _locker = new object();
+        private bool lastWasTaken = false;
 
         private class PartitionInfoComparer : IComparer<PartitionInfo>
         {
-            // Helps to avoid deduplication limitation of SortedSet
-            public bool TrickyMode { get; set; } = true;
-
             public int Compare(PartitionInfo p1, PartitionInfo p2)
             {
+                if (p1.Partition.FullName.Equals(p2.Partition.FullName))
+                    return 0;
+
                 var compare = Math.Sign(p1.LinesCount - p2.LinesCount);
 
-                if (TrickyMode)
-                {
-                    if (compare == 0)
-                        return -1;
-                }
+                // Helps to avoid deduplication limitation of SortedSet
+                if (compare == 0)
+                    return -1;
 
                 return compare;
             }

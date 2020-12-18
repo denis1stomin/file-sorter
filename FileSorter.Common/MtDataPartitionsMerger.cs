@@ -112,6 +112,7 @@ namespace FileSorter.Common
 
         private readonly List<Thread> _threads = new List<Thread>();
         private readonly PartitionMap _partitionMap = new PartitionMap();
+        private readonly int _currentlyInProgressWorkersCount = 0;
         private readonly ManualResetEvent _noMorePartitionsEvent = new ManualResetEvent(false);
 
         private class MergerThreadArg
