@@ -51,24 +51,34 @@ namespace FileSorter.Common
 
                     if (partition.Count == PartitionMaxSize)
                     {
-                        var t = new Thread(new ParameterizedThreadStart(WorkerThreadFunc));
-
-                        lock (_workerThreads)
-                            _workerThreads.Add(t);
-
-                        t.Start(partition);
-                        
+                        InvokeWorkerThreadForPartition(partition);
                         partition = new List<T>((int)PartitionMaxSize);
                     }
 
                     next = _dataReader.NextItem();
                 }
+
+                if (partition.Count > 0)
+                    InvokeWorkerThreadForPartition(partition);
+
+                partition = null;
+                GC.Collect();
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Got an error {ex}, {ex.Message}");
                 throw;
             }
+        }
+
+        private void InvokeWorkerThreadForPartition(List<T> partition)
+        {
+            var t = new Thread(new ParameterizedThreadStart(WorkerThreadFunc));
+
+            lock (_workerThreads)
+                _workerThreads.Add(t);
+
+            t.Start(partition);
         }
 
         private void WorkerThreadFunc(object partition)

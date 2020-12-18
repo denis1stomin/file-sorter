@@ -31,14 +31,12 @@ namespace FileSorter.Common
 
         public override void WaitWorkFinished()
         {
-            Console.WriteLine($"Waiting merger threads are finished.");
             foreach (var t in _threads)
                 t.Join();
         }
 
         public override void SignalNoMoreNewPartitions()
         {
-            Console.WriteLine($"Signalling no more new partitions.");
             _noMorePartitionsEvent.Set();
         }
 
@@ -51,26 +49,7 @@ namespace FileSorter.Common
         {
             try
             {
-                PartitionInfo part1 = null;
-                PartitionInfo part2 = null;
-
-                while (_partitionMap.TakePartitionsToMerge(out part1, out part2) || NewPartitionsArePossible)
-                {
-                    if (part1 != null && part2 != null)
-                    {
-                        var newPart = MergeTwoPartitions(part1, part2);
-                        _partitionMap.AddNewPartition(newPart);
-
-                        part1 = null;
-                        part2 = null;
-                    }
-                    else
-                    {
-                        Console.Write($"Waiting new partitions...");
-
-                        _partitionMap.WaitNewPartition(TimeSpan.FromSeconds(1));
-                    }
-                }
+                ThreadFuncMainLoop();
 
                 var lastPart = _partitionMap.TakeLastPartition();
                 if (lastPart != null)
@@ -92,6 +71,27 @@ namespace FileSorter.Common
             }
         }
 
+        private void ThreadFuncMainLoop()
+        {
+            bool gotPairToMerge = false;
+            do
+            {
+                gotPairToMerge = _partitionMap.TakePartitionsForMerge(out var part1, out var part2, out var mergeTicket);
+                if (gotPairToMerge)
+                {
+                    var newPart = MergeTwoPartitions(part1, part2);
+                    _partitionMap.AddNewPartition(newPart, mergeTicket);
+                }
+                else
+                {
+                    Console.Write($".");
+
+                    _partitionMap.WaitNewPartition(TimeSpan.FromSeconds(1));
+                }
+            }
+            while (gotPairToMerge || _partitionMap.GetInProgressMergeCount() > 0 || NewPartitionsCanArriveFromOutside);
+        }
+
         private int WorkerThreadsCount
         {
             get
@@ -101,7 +101,7 @@ namespace FileSorter.Common
             }
         }
 
-        private bool NewPartitionsArePossible
+        private bool NewPartitionsCanArriveFromOutside
         {
             get
             {
@@ -112,7 +112,6 @@ namespace FileSorter.Common
 
         private readonly List<Thread> _threads = new List<Thread>();
         private readonly PartitionMap _partitionMap = new PartitionMap();
-        private readonly int _currentlyInProgressWorkersCount = 0;
         private readonly ManualResetEvent _noMorePartitionsEvent = new ManualResetEvent(false);
 
         private class MergerThreadArg

@@ -16,14 +16,18 @@ namespace FileSorter.Common
             return _newPartitionEvent.WaitOne(timeout);
         }
 
-        public bool TakePartitionsToMerge(out PartitionInfo part1, out PartitionInfo part2)
+        public bool TakePartitionsForMerge(out PartitionInfo part1, out PartitionInfo part2, out Guid mergeTicket)
         {
+            mergeTicket = Guid.NewGuid();
+
             lock (_locker)
             {
                 if (_partitions.Count >= 2)
                 {
                     part1 = PopMinUnsafe();
                     part2 = PopMinUnsafe();
+
+                    _activeMerges.Add(mergeTicket);
 
                     return true;
                 }
@@ -35,16 +39,23 @@ namespace FileSorter.Common
             return false;
         }
 
-        public void AddNewPartition(PartitionInfo partition)
+        public int GetInProgressMergeCount()
         {
-            Console.WriteLine($"Adding new partition '{partition.Partition.Name}/{partition.LinesCount}'");
+            lock (_locker)
+                return _activeMerges.Count;
+        }
 
+        public void AddNewPartition(PartitionInfo partition, Guid? mergeTicket = null)
+        {
             lock (_locker)
             {
                 if (lastWasTaken)
                     throw new Exception("Something wrong here!");
 
                 _partitions.Add(partition);
+
+                if (mergeTicket.HasValue)
+                    _activeMerges.Remove(mergeTicket.Value);
             }
 
             _newPartitionEvent.Set();
@@ -86,6 +97,7 @@ namespace FileSorter.Common
         private readonly SortedSet<PartitionInfo> _partitions;
         private readonly AutoResetEvent _newPartitionEvent = new AutoResetEvent(false);
         private readonly object _locker = new object();
+        private readonly List<Guid> _activeMerges = new List<Guid>(10);
         private bool lastWasTaken = false;
 
         private class PartitionInfoComparer : IComparer<PartitionInfo>
