@@ -50,7 +50,7 @@ namespace FileSorter.Common
             throw new NotImplementedException();
         }
 
-        public virtual void WaitWorkFinished()
+        public virtual void FinishWork()
         {
             throw new NotImplementedException();
         }
@@ -84,7 +84,7 @@ namespace FileSorter.Common
             var linesSum = first.LinesCount + second.LinesCount;
 
             var mergedPath = $"{PartitionFolder}/{linesSum}_{Guid.NewGuid()}.part";
-            var outputStream = Utils.CreateExclusiveWriteFile(mergedPath);
+            var outputStream = Utils.CreateExclusiveWriteFile(mergedPath, 1024 * 1024 * 32);
 
             using (var pairMerger = new TwoStreamsMerger<T>(
                 stream1, stream2, outputStream, _dataComparer, _parser))

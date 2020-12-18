@@ -34,10 +34,23 @@ namespace FileSorter.Common
             }
         }
 
-        public override void WaitWorkFinished()
+        public override void FinishWork()
         {
             foreach (var t in _threads)
                 t.Join();
+            
+            var lastPart = _partitionMap.TakeLastPartition();
+            if (lastPart != null)
+            {
+                var p1 = DateTime.UtcNow;
+                if (File.Exists(DestinationPath))
+                    File.Delete(DestinationPath);
+
+                File.Move(lastPart.Partition.FullName, DestinationPath);
+                var p2 = DateTime.UtcNow;
+
+                Console.WriteLine($"Just moving to destination took '{p2.Subtract(p1)}'");
+            }
         }
 
         public override void SignalNoMoreNewPartitions()
@@ -55,19 +68,6 @@ namespace FileSorter.Common
             try
             {
                 ThreadFuncMainLoop();
-
-                var lastPart = _partitionMap.TakeLastPartition();
-                if (lastPart != null)
-                {
-                    var p1 = DateTime.UtcNow;
-                    if (File.Exists(DestinationPath))
-                        File.Delete(DestinationPath);
-
-                    File.Move(lastPart.Partition.FullName, DestinationPath);
-                    var p2 = DateTime.UtcNow;
-
-                    Console.WriteLine($"Just moving to destination took '{p2.Subtract(p1)}'");
-                }
             }
             catch (Exception ex)
             {
@@ -86,13 +86,16 @@ namespace FileSorter.Common
                 {
                     var newPart = MergeTwoPartitions(part1, part2);
                     _partitionMap.AddNewPartition(newPart, mergeTicket);
+
+                    // share CPU time
+                    Thread.Sleep(0);
                 }
                 else
                 {
                     _partitionMap.WaitNewPartition(TimeSpan.FromSeconds(1));
                 }
             }
-            while (gotPairToMerge || _partitionMap.GetInProgressMergeCount() > 0 || NewPartitionsCanArriveFromOutside);
+            while (NewPartitionsCanArriveFromOutside || _partitionMap.HavePartitionsForMerge());
         }
 
         private int WorkerThreadsCount

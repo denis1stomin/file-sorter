@@ -27,8 +27,8 @@ namespace FileSorter.Common
         /// Returns two partitions for merge and merge ticket (kinda merge operation cookie).
         bool TakePartitionsForMerge(out PartitionInfo part1, out PartitionInfo part2, out Guid mergeTicket);
 
-        /// Returns the number of in-progress merges (active merge tickets).
-        int GetInProgressMergeCount();
+        /// States does the map have more partitions to merge.
+        bool HavePartitionsForMerge();
 
         /// Returns a very last single partition.
         PartitionInfo TakeLastPartition();

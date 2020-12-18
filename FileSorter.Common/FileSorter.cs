@@ -49,7 +49,7 @@ namespace FileSorter.Common
 
             merger.SignalNoMoreNewPartitions();
             merger.StartMoreWorkers(MergerThreadsNum);
-            merger.WaitWorkFinished();
+            merger.FinishWork();
             var p3 = DateTime.UtcNow;
 
             Console.WriteLine($"Partitioning step took '{p2.Subtract(p1)}'");

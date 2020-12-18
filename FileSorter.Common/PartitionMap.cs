@@ -39,10 +39,15 @@ namespace FileSorter.Common
             return false;
         }
 
-        public int GetInProgressMergeCount()
+        public bool HavePartitionsForMerge()
         {
             lock (_locker)
-                return _activeMerges.Count;
+            {
+                int toMergeInFuture = _partitions.Count + _activeMerges.Count;
+
+                // the last partition doesn't need to be merged.
+                return (toMergeInFuture > 1);
+            }
         }
 
         public void AddNewPartition(PartitionInfo partition, Guid? mergeTicket = null)

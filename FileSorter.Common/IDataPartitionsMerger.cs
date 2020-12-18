@@ -21,7 +21,7 @@ namespace FileSorter.Common
         void StartMoreWorkers(int num);
 
         /// Blocks current thread till whole work is finished.
-        void WaitWorkFinished();
+        void FinishWork();
 
         /// Signals to internal workers that there will no be more partitions to handle.
         void SignalNoMoreNewPartitions();
