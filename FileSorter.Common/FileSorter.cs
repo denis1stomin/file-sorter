@@ -69,7 +69,7 @@ namespace FileSorter.Common
             var partitioner = new MtDataPartitionerSorter<DataItem>(
                 _sourceReader, TempFolder, TempFileMaxSize, new DataItemComparer(), ThreadsNum, _partitionMap);
 
-            partitioner.StartWork(true);
+            partitioner.StartWork(false);
 
             return partitioner;
         }
