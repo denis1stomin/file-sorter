@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace FileSorter.Common
@@ -15,14 +16,14 @@ namespace FileSorter.Common
             if (numCompare != 0)
                 return numCompare;
 
-            // TODO : use StringComparer to ignore some localization specifics.
-
-            var textCompare = d1.Text.CompareTo(d2.Text);
+            var textCompare = _textComparer.Compare(d1.Text, d2.Text);;
             if (textCompare != 0)
                 return textCompare;
 
             // This trick is used to avoid SortedSet structure limitation on elements duplication.
             return -1;
         }
+
+        private StringComparer _textComparer = StringComparer.Ordinal;      // ignore culture
     }
 }

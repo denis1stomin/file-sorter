@@ -89,8 +89,6 @@ namespace FileSorter.Common
                 }
                 else
                 {
-                    Console.Write($".");
-
                     _partitionMap.WaitNewPartition(TimeSpan.FromSeconds(1));
                 }
             }

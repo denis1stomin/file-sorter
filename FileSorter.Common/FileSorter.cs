@@ -12,7 +12,8 @@ namespace FileSorter.Common
         public int PartitionerThreadsNum { get; } = Environment.ProcessorCount / 2;
         public int MergerThreadsNum { get; } = 2;
 
-        public FileSorter(string sourcePath, string destPath, string tempDir, long tempSize, int threadsNum)
+        public FileSorter(
+            string sourcePath, string destPath, string tempDir, long tempSize, int partitionerThreadsNum, int mergerThreadsNum)
         {
             SourcePath = !string.IsNullOrWhiteSpace(sourcePath) ?
                 sourcePath : throw new ArgumentException(nameof(sourcePath));
@@ -26,8 +27,11 @@ namespace FileSorter.Common
             TempFileMaxSize = (tempSize > 0) ? tempSize
                 : throw new ArgumentException($"{nameof(tempSize)} parameter is '{tempSize}'");
             
-            PartitionerThreadsNum = (threadsNum > 0 && threadsNum < 30) ? threadsNum
-                : throw new ArgumentException($"{nameof(threadsNum)} parameter is '{threadsNum}'");
+            PartitionerThreadsNum = (partitionerThreadsNum > 0 && partitionerThreadsNum < 20) ? partitionerThreadsNum
+                : throw new ArgumentException($"{nameof(partitionerThreadsNum)} parameter is '{partitionerThreadsNum}'");
+            
+            MergerThreadsNum = (mergerThreadsNum > 0 && mergerThreadsNum < 20) ? mergerThreadsNum
+                : throw new ArgumentException($"{nameof(mergerThreadsNum)} parameter is '{mergerThreadsNum}'");
         }
 
         public void Sort()
@@ -70,9 +74,11 @@ namespace FileSorter.Common
             _sourceReader = new FileDataReader<DataItem>(SourcePath, _parser);
 
 #warning  DataItemComparer(ignoreText = true) if partition size is bigger than whole source file the partition will be sorted with no respect to text field.
+            bool ignoreTextWhileComparingItems = true;
 
             var partitioner = new MtDataPartitionerSorter<DataItem>(
-                _sourceReader, TempFolder, TempFileMaxSize, new DataItemComparer(true), PartitionerThreadsNum, _partitionMap);
+                _sourceReader, TempFolder, TempFileMaxSize,
+                new DataItemComparer(ignoreTextWhileComparingItems), PartitionerThreadsNum, _partitionMap);
 
             partitioner.StartWork(false);
 
@@ -82,7 +88,7 @@ namespace FileSorter.Common
         private IDataPartitionsMerger<DataItem> StartMergingSortedPartitions()
         {
             var merger = new MtDataPartitionsMerger<DataItem>(
-                TempFolder, DestPath, new DataItemComparer(false), _parser, MergerThreadsNum, _partitionMap);
+                TempFolder, DestPath, new DataItemComparer(), _parser, MergerThreadsNum, _partitionMap);
 
             merger.StartWork();
 

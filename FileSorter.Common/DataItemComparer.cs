@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace FileSorter.Common
@@ -20,18 +21,13 @@ namespace FileSorter.Common
             if (numCompare != 0)
                 return numCompare;
 
-            // TODO : may be use StringComparer to ignore some localization specifics.
-
             if (!_ignoreText)
-            {
-                var textCompare = d1.Text.CompareTo(d2.Text);
-                if (textCompare != 0)
-                    return textCompare;
-            }
+                return _textComparer.Compare(d1.Text, d2.Text);
 
             return 0;
         }
 
         private bool _ignoreText = false;
+        private StringComparer _textComparer = StringComparer.Ordinal;      // ignore culture
     }
 }

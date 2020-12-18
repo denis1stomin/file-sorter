@@ -23,10 +23,10 @@ namespace FileSorter.UTests
         {
             ClearTestFolder();
 
-            int maxCount = 100;
+            int maxCount = 200;
             var initialList = new List<string>();
-            for (int i = 0; i< 3 * maxCount + 2; ++i)
-                initialList.Add($"{_rand.Next(1000)}. Some text {_rand.Next(100)}");
+            for (int i = 0; i < maxCount + 2; ++i)
+                initialList.Add($"{i}. Some text {_rand.Next(100)}");
 
             int idx = 0;
             var writer = new Mock<IDataReader<string>>();
@@ -41,12 +41,11 @@ namespace FileSorter.UTests
             var sorter = new DataPartitionerSorter<string>(writer.Object, TestFolder, maxCount, stringComparer);
 
             Assert.AreEqual(TestFolder, sorter.PartitionFolder);
-            Assert.AreEqual(maxCount, sorter.PartitionMaxSize);
 
             sorter.StartWork();
 
             var partitionsCnt = Directory.GetFiles(TestFolder).Count();
-            Assert.AreEqual(4, partitionsCnt);
+            Assert.AreEqual(68, partitionsCnt);
         }
 
         private void ClearTestFolder()
@@ -57,7 +56,7 @@ namespace FileSorter.UTests
             Directory.CreateDirectory(TestFolder);
         }
 
-        private Random _rand = new Random();
+        private Random _rand = new Random(0);
         private const string TestFolder = "./test-temp";
     }
 }

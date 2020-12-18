@@ -73,7 +73,7 @@ namespace FileSorter.Common
 
         protected PartitionInfo MergeTwoPartitions(PartitionInfo first, PartitionInfo second)
         {
-            Console.WriteLine($"Merging parts: '{first.Partition.Name}/{first.LinesCount}' and '{second.Partition.Name}/{second.LinesCount}'");
+            //Console.WriteLine($"Merging parts: '{first.Partition.Name}/{first.LinesCount}' and '{second.Partition.Name}/{second.LinesCount}'");
 
             var firstPath = first.Partition.FullName;
             var stream1 = Utils.OpenSharedReadFile(firstPath);
