@@ -72,7 +72,7 @@ namespace FileSorter.Common
             }
 
             data.Clear();
-            //GC.Collect();
+            GC.Collect();
 
             return new FileInfo(partitionPath);
         }

@@ -45,6 +45,11 @@ namespace FileSorter.Common
             Console.WriteLine($"Just moving to destination took '{p2.Subtract(p1)}'");
         }
 
+        public virtual void StartMoreWorkers(int num)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual void WaitWorkFinished()
         {
             throw new NotImplementedException();

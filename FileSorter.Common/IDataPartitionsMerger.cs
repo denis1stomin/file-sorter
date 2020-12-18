@@ -17,6 +17,9 @@ namespace FileSorter.Common
         /// Starts merging work.
         void StartWork();
 
+        /// Starts additional worker threads if applicable.
+        void StartMoreWorkers(int num);
+
         /// Blocks current thread till whole work is finished.
         void WaitWorkFinished();
 

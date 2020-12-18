@@ -21,7 +21,12 @@ namespace FileSorter.Common
 
         public override void StartWork()
         {
-            for (int i = ThreadsMax; i > 0; --i)
+            StartMoreWorkers(ThreadsMax);
+        }
+
+        public override void StartMoreWorkers(int num)
+        {
+            for (int i = num; i > 0; --i)
             {
                 var t = new Thread(new ThreadStart(ThreadFunc));
                 _threads.Add(t);

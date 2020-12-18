@@ -4,6 +4,11 @@ namespace FileSorter.Common
 {
     public class DataItemComparer : IComparer<DataItem>
     {
+        public DataItemComparer(bool ignoreText = false)
+        {
+            _ignoreText = ignoreText;
+        }
+
         public int Compare(DataItem d1, DataItem d2)
         {
             if (d1 == null)
@@ -15,13 +20,18 @@ namespace FileSorter.Common
             if (numCompare != 0)
                 return numCompare;
 
-            // TODO : use StringComparer to ignore some localization specifics.
+            // TODO : may be use StringComparer to ignore some localization specifics.
 
-            var textCompare = d1.Text.CompareTo(d2.Text);
-            if (textCompare != 0)
-                return textCompare;
+            if (!_ignoreText)
+            {
+                var textCompare = d1.Text.CompareTo(d2.Text);
+                if (textCompare != 0)
+                    return textCompare;
+            }
 
             return 0;
         }
+
+        private bool _ignoreText = false;
     }
 }

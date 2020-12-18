@@ -8,24 +8,23 @@ namespace FileSorter.Common
     public class TwoStreamsMerger<T> : IDisposable where T : class
     {
         public Encoding Encoding { get; } = Encoding.UTF8;
-        public int ReaderBufferSize { get; } = 1024 * 1024 * 50;
-        public int WriterBufferSize { get; } = 1024 * 1024 * 100;
 
-        public TwoStreamsMerger(Stream stream1, Stream stream2, Stream outputStream, IComparer<T> comparer, Func<string, T> parser)
+        public TwoStreamsMerger(
+            Stream stream1, Stream stream2, Stream outputStream, IComparer<T> comparer, Func<string, T> parser)
         {
             _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
             _parser = parser ?? throw new ArgumentNullException(nameof(parser));
 
             _stream1 =  (stream1 != null) ?
-                new StreamReader(stream1, Encoding, false, ReaderBufferSize)
+                new StreamReader(stream1, Encoding)
                     : throw new ArgumentNullException(nameof(stream1));
 
             _stream2 =  (stream2 != null) ?
-                new StreamReader(stream2, Encoding, false, ReaderBufferSize)
+                new StreamReader(stream2, Encoding)
                     : throw new ArgumentNullException(nameof(stream2));
             
             _outputStream =  (outputStream != null) ?
-                new StreamWriter(outputStream, Encoding, WriterBufferSize)
+                new StreamWriter(outputStream, Encoding)
                     : throw new ArgumentNullException(nameof(outputStream));
         }
 
@@ -42,7 +41,7 @@ namespace FileSorter.Common
                     item2 = WriteItemAndGetNext(item2, _stream2);
             }
 
-            // of of those (item1 or item2) equals to null here
+            // one of those (item1 or item2) equals to null at this point
 
             while (item1 != null)
                 item1 = WriteItemAndGetNext(item1, _stream1);
