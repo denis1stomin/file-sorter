@@ -73,12 +73,9 @@ namespace FileSorter.Common
         {
             _sourceReader = new FileDataReader<DataItem>(SourcePath, _parser);
 
-#warning  DataItemComparer(ignoreText = true) if partition size is bigger than whole source file the partition will be sorted with no respect to text field.
-            bool ignoreTextWhileComparingItems = true;
-
             var partitioner = new MtDataPartitionerSorter<DataItem>(
                 _sourceReader, TempFolder, TempFileMaxSize,
-                new DataItemComparer(ignoreTextWhileComparingItems), PartitionerThreadsNum, _partitionMap);
+                new DataItemComparer(), PartitionerThreadsNum, _partitionMap);
 
             partitioner.StartWork(false);
 

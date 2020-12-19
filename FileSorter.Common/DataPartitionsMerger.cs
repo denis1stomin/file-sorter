@@ -13,6 +13,7 @@ namespace FileSorter.Common
         public string DestinationPath { get; }
 
         public Encoding Encoding { get; } = Encoding.UTF8;
+        public int FileBufferSize { get; } = 1024 * 1024 * 64;
 
         public DataPartitionsMerger(
             string partitionFolder, string destPath, IComparer<T> dataComparer, Func<string, T> parser)
@@ -76,15 +77,15 @@ namespace FileSorter.Common
             //Console.WriteLine($"Merging parts: '{first.Partition.Name}/{first.LinesCount}' and '{second.Partition.Name}/{second.LinesCount}'");
 
             var firstPath = first.Partition.FullName;
-            var stream1 = Utils.OpenSharedReadFile(firstPath);
+            var stream1 = Utils.OpenSharedReadFile(firstPath, FileBufferSize);
 
             var secondPath = second.Partition.FullName;
-            var stream2 = Utils.OpenSharedReadFile(secondPath);
+            var stream2 = Utils.OpenSharedReadFile(secondPath, FileBufferSize);
 
             var linesSum = first.LinesCount + second.LinesCount;
 
             var mergedPath = $"{PartitionFolder}/{linesSum}_{Guid.NewGuid()}.part";
-            var outputStream = Utils.CreateExclusiveWriteFile(mergedPath, 1024 * 1024 * 32);
+            var outputStream = Utils.CreateExclusiveWriteFile(mergedPath, FileBufferSize);
 
             using (var pairMerger = new TwoStreamsMerger<T>(
                 stream1, stream2, outputStream, _dataComparer, _parser))

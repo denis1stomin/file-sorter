@@ -13,6 +13,14 @@ namespace FileSorter.Common
             return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
 
+        public static FileStream OpenSharedReadFile(string path, int bufferSize)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                throw new ArgumentException(nameof(path));
+            
+            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize);
+        }
+
         public static FileStream CreateExclusiveWriteFile(string path)
         {
             if (string.IsNullOrWhiteSpace(path))

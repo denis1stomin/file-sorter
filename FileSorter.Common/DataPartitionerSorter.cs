@@ -17,6 +17,8 @@ namespace FileSorter.Common
 
         public static Encoding Encoding { get; } = Encoding.UTF8;
 
+        public static int FileBufferSize { get; } = 1024 * 1024 * 64;
+
         public DataPartitionerSorter(
             IDataReader<T> dataReader, string partitionFolder, long partitionMaxSize, IComparer<T> dataComparer)
         {
@@ -61,7 +63,7 @@ namespace FileSorter.Common
         protected static FileInfo SavePartition(ICollection<T> data, string saveFolder)
         {
             var partitionPath = $"{saveFolder}/{data.Count}_{Guid.NewGuid()}.part";
-            var stream = Utils.CreateExclusiveWriteFile(partitionPath);
+            var stream = Utils.CreateExclusiveWriteFile(partitionPath, FileBufferSize);
 
             using (var writer = new StreamWriter(stream, Encoding))
             {
