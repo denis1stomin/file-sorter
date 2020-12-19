@@ -15,7 +15,7 @@ namespace FileSorter.Common
             
             _parser = parser ?? throw new ArgumentNullException(nameof(parser));
 
-            var stream = Utils.OpenSharedReadFile(filePath);
+            var stream = Utils.OpenSharedReadFile(filePath, 1024 * 1024 * 128);
             _reader = new StreamReader(stream, Encoding);
         }
 
